@@ -248,8 +248,8 @@ char* intSrPositiveDelta(int aexp, int den, int b, double delta, int absDelta, c
     if(divisible){
 
             snprintf(bSimplify, 100, "(%c%s %c %i)(%c%s %c %i)", var, powerRoot,
-            ((-b + sqrt(absDelta))/den >= 0) ? '-' : '+', (abs)(numeratorSum)/den, var, powerRoot,
-            ((-b - sqrt(absDelta))/den >= 0) ? '-' : '+', (abs)(numeratorSub)/den);
+            ((-b + sqrt(absDelta))/den >= 0) ? '-' : '+', (abs)((numeratorSum)/den), var, powerRoot,
+            ((-b - sqrt(absDelta))/den >= 0) ? '-' : '+', (abs)((numeratorSub)/den));
         }
 
         else if(!divisible && b != 0){
