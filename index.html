@@ -1,226 +1,446 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-<meta charset="UTF-8">
-<title>Polynomialsz</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Polynomialsz</title>
 
-<style>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            overflow: hidden;
+        }
 
-body {
-    font-family: 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, #7f1dc0, #401579, #234ba1);
-    color: white;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #7f1dc0, #401579, #234ba1);
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
 
-.container {
-    background: #1e1e1e;
-    padding: 30px;
-    border-radius: 15px;
-    width: 700px;
-    max-height: 90vh;
-    box-shadow: 0 0 25px rgba(0,0,0,0.6);
-    display: flex;
-    flex-direction: column;
-}
+        .sidebar {
+            background: #1e1e1e;
+            padding: 20px;
+            width: 320px;
+            height: 100%;
+            overflow: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+            flex-shrink: 0;
+            box-sizing: border-box;
+        }
 
-h2 {
-    text-align: center;
-    margin-bottom: 20px;
-}
+        .sidebar h3 {
+            text-align: center;
+            margin-top: 0;
+            margin-bottom: 20px;
+            color: #7f2aee;
+        }
 
-input {
-    width: 96%;
-    padding: 12px;
-    font-size: 16px;
-    border-radius: 8px;
-    border: none;
-    outline: none;
-}
+        .main-area {
+            flex: 1;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            height: 100%;
+        }
 
-button {
-    width: 100%;
-    margin-top: 15px;
-    padding: 12px;
-    font-size: 16px;
-    border: none;
-    border-radius: 8px;
-    background: #7f2aee;
-    color: white;
-    font-weight: bold;
-    cursor: pointer;
-    transition: 0.2s;
-}
+        .container {
+            position: relative;
+            width: 800px;
+            max-width: 90%;
+            background: #1e1e1e;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+            display: flex;
+            flex-direction: column;
+            min-height: 40vh;
+            max-height: 90vh;
+            overflow: auto;
+        }
 
-button:hover {
-    background: #903bff;
-}
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
 
-pre {
-    margin-top: 20px;
-    background: #111;
-    padding: 15px;
-    border-radius: 10px;
-    min-height: 80px;
-    max-height: 400px;
-    overflow: auto;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: 'Roboto', 'Courier New', 'Consolas', monospace;
-    font-size: 16px;
-    line-height: 1.5;
-}
-</style>
+        input {
+            width: 100%;
+            padding: 12px;
+            font-size: 16px;
+            border-radius: 10px;
+            border: none;
+            outline: none;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            margin-top: 15px;
+            padding: 12px;
+            font-size: 16px;
+            border: none;
+            border-radius: 10px;
+            background: #7f2aee;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #903bff;
+        }
+
+        pre {
+            margin-top: 20px;
+            background: #111;
+            padding: 15px;
+            border-radius: 10px;
+            min-height: 70px;
+            max-height: 70px;
+            overflow: auto;
+            white-space: pre-wrap;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .roots-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .roots-list li {
+            background: #2a2a2a;
+            margin: 8px 0;
+            padding: 10px;
+            border-radius: 8px;
+            border-left: 3px solid #7f2aee;
+        }
+
+        .roots-list li::before {
+            content: "🌱 ";
+            margin-right: 5px;
+        }
+
+        .empty-roots {
+            color: #888;
+            text-align: center;
+            font-style: italic;
+        }
+
+        /* ================= MOBILE ================= */
+        @media (max-width: 768px) {
+            body {
+                flex-direction: column;
+            }
+
+            .sidebar {
+                width: 100%;
+                max-height: 35vh;
+                height: auto;
+                box-shadow: none;
+                border-bottom: 2px solid #2a2a2a;
+            }
+
+            .main-area {
+                width: 100%;
+                height: auto;
+                flex: 1;
+                overflow: hidden;
+                padding: 15px;
+                box-sizing: border-box;
+            }
+
+            .container {
+                position: relative;
+                width: 100%;
+                max-width: 100%;
+                padding: 20px;
+                border-radius: 15px;
+                max-height: 100%;
+            }
+
+            input {
+                font-size: 16px;
+            }
+
+            button {
+                font-size: 16px;
+                padding: 14px;
+            }
+
+            pre {
+                font-size: 13px;
+                min-height: 15px;
+                max-height: 30px;
+            }
+
+            .roots-list li {
+                font-size: 13px;
+                padding: 8px;
+            }
+        }
+    </style>
 </head>
 
 <body>
 
-<div class="container">
-
-    <h2>Polynomialsz</h2>
-
-    <input id="input" placeholder="Ex: x^3 - x^2 - x - 1, x**10 + 1, etc">
-    <button id="btn" onclick="fatorar()" disabled>Factorize / Find roots</button>
-
-    <pre id="saida">Loading...</pre>
+<div class="sidebar">
+    <h3>Roots</h3>
+    <div id="roots-container">
+        <div class="empty-roots">[...]</div>
+    </div>
 </div>
 
-<script>
-// Ativar tecla Enter no input
-document.getElementById('input').addEventListener('keypress', function(event) {
-    if (event.key === 'Enter') {
-        event.preventDefault();
-        if (!document.getElementById('btn').disabled) {
-            fatorar();
-        }
-    }
-});
+<div class="main-area">
+    <div class="container">
+        <h2><a href="https://github.com/Zaqu1h/polynomialsz" target="_blank" style="color: white; text-decoration: none;">Polynomialsz v1.1.1</a></h2>
 
-function parsePolinomio(str) {
+        <input id="input" placeholder="Example: x^3 - x^2 - x - 1, x**10 - 1...">
+        <button id="btn" onclick="fatorar()" disabled>Factorize / Find roots</button>
 
-    str = str.replace(/\s+/g, '');
+        <div style="position: absolute; bottom: 1.3vh; left: 30px; display: flex; align-items: center; gap: 8px; font-size: 2.5vh; color: white; font-family: 'Segoe UI', sans-serif;">
+            <a href="https://www.uesc.br/" target="_blank">
+                <img src="UESCBW.png" style="width: 3vh; height: auto; opacity: 0.8;">
+            </a>
+            <span style="margin-left: 5px;">
+                <a href="https://github.com/Zaqu1h/" target="_blank" style="color: #7f2aee; text-decoration: underline;">Isaque Passos</a>
+                | Ciência da Computação, 2026
+            </span>
+        </div>
 
-    str = str.replaceAll('⁹', '^9')
-             .replaceAll('⁸', '^8')
-             .replaceAll('⁷', '^7')
-             .replaceAll('⁶', '^6')
-             .replaceAll('⁵', '^5')
-             .replaceAll('⁴', '^4')
-             .replaceAll('³', '^3')
-             .replaceAll('²', '^2')
-             .replaceAll('¹', '^1')
-             .replaceAll('⁰', '^0')
-             .replaceAll('**', '^');
-    
-    let varMatch = str.match(/[a-zA-Z]/);
-    if (!varMatch) throw new Error("No variables found.");
-    let variavel = varMatch[0];
-    
-    let allVars = [...str.matchAll(/[a-zA-Z]/g)];
-    if (allVars.some(m => m[0] !== variavel)) throw new Error("Use only one variable!");
-    
-    let termos = str.match(/[+-]?[^+-]+/g);
-    if (!termos) throw new Error("Invalid expression.");
-    
-    let mapa = {};
-    
-    termos.forEach(t => {
-        let sinal = t.startsWith('-') ? -1 : 1;
-        t = t.replace(/^[+-]/, '');
-        let coef = 1, exp = 0;
-        
-        if (t.includes(variavel)) {
-            let partes = t.split(variavel);
-            if (partes[0] === '') coef = 1;
-            else if (partes[0] === '-') coef = -1;
-            else coef = parseInt(partes[0]);
-            if (isNaN(coef)) coef = 1;
-            
-            if (partes[1] && partes[1].startsWith('^')) exp = parseInt(partes[1].slice(1));
-            else exp = 1;
-        } else {
-            coef = parseInt(t);
-            exp = 0;
-        }
-        coef *= sinal;
-        mapa[exp] = (mapa[exp] || 0) + coef;
-    });
-    
-    let grau = Math.max(...Object.keys(mapa).map(Number));
-
-    let coefArray = [];
-
-    for (let i = grau; i >= 0; i--) coefArray.push(mapa[i] || 0);
-
-    return coefArray;
-}
-
-let fatorarPtrFunc;
-
-window.Module = {
-    onRuntimeInitialized: function() {
-        fatorarPtrFunc = (ptr, len) => {
-            return Module.ccall('fatorar_array', 'number', ['number', 'number'], [ptr, len]);
-        };
-        document.getElementById("btn").disabled = false;
-        document.getElementById("saida").innerText = "[...]";
-    }
-};
-
-function fatorar() {
-
-    if (!fatorarPtrFunc) {
-        alert("Waiting...");
-        return;
-    }
-    
-    let input = document.getElementById("input").value;
-    if (!input.trim()) {
-        alert("Type your polynomial");
-        return;
-    }
-    
-    let coef;
-    try {
-        coef = parsePolinomio(input);
-    } catch (e) {
-        document.getElementById("saida").innerText = "Erro: " + e.message;
-        return;
-    }
-    
-    let bytes = coef.length * 4;
-    let ptr = Module._malloc(bytes);
-    
-    for (let i = 0; i < coef.length; i++) {
-        Module.HEAP32[ptr / 4 + i] = coef[i];
-    }
-    
-    let resultPtr = fatorarPtrFunc(ptr, coef.length);
-
-    let bytesArray = [];
-    for (let i = 0; i < 50000; i++) {
-        let byte = Module.HEAPU8[resultPtr + i];
-        if (byte === 0) break;
-        bytesArray.push(byte);
-    }
-    
-    let resultadoCompleto = new TextDecoder('utf-8').decode(new Uint8Array(bytesArray));
-    
-    let resultado = resultadoCompleto;
-    let igualIndex = resultadoCompleto.indexOf('=');
-    if (igualIndex !== -1 && igualIndex + 1 < resultadoCompleto.length) {
-        resultado = resultadoCompleto.substring(igualIndex + 1).trim();
-    }
-    
-    document.getElementById("saida").innerText = resultado;
-    Module._free(ptr);
-}
-</script>
-
-<script src="polynomialsz.js"></script>
+        <pre id="saida">Loading...</pre>
+    </div>
+</div>
 
 </body>
 </html>
+
+<script>
+    // Ativar tecla Enter no input
+    document.getElementById('input').addEventListener('keypress', function(event) {
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            if (!document.getElementById('btn').disabled) {
+                fatorar();
+            }
+        }
+    });
+
+    function parsePolinomio(str) {
+        str = str.replace(/\s+/g, '');
+        str = str.replaceAll('⁹', '^9')
+                 .replaceAll('⁸', '^8')
+                 .replaceAll('⁷', '^7')
+                 .replaceAll('⁶', '^6')
+                 .replaceAll('⁵', '^5')
+                 .replaceAll('⁴', '^4')
+                 .replaceAll('³', '^3')
+                 .replaceAll('²', '^2')
+                 .replaceAll('¹', '^1')
+                 .replaceAll('⁰', '^0')
+                 .replaceAll('**', '^');
+        
+        let varMatch = str.match(/[a-zA-Z]/);
+        if (!varMatch) throw new Error("No variables found.");
+        let variavel = varMatch[0];
+        
+        let allVars = [...str.matchAll(/[a-zA-Z]/g)];
+        if (allVars.some(m => m[0] !== variavel)) throw new Error("Use only one variable!");
+        
+        let termos = str.match(/[+-]?[^+-]+/g);
+        if (!termos) throw new Error("Invalid expression.");
+        
+        let mapa = {};
+        termos.forEach(t => {
+            let sinal = t.startsWith('-') ? -1 : 1;
+            t = t.replace(/^[+-]/, '');
+            let coef = 1, exp = 0;
+            
+            if (t.includes(variavel)) {
+                let partes = t.split(variavel);
+                if (partes[0] === '') coef = 1;
+                else if (partes[0] === '-') coef = -1;
+                else coef = parseInt(partes[0]);
+                if (isNaN(coef)) coef = 1;
+                
+                if (partes[1] && partes[1].startsWith('^')) exp = parseInt(partes[1].slice(1));
+                else exp = 1;
+            } else {
+                coef = parseInt(t);
+                exp = 0;
+            }
+            coef *= sinal;
+            mapa[exp] = (mapa[exp] || 0) + coef;
+        });
+        
+        let grau = Math.max(...Object.keys(mapa).map(Number));
+        let coefArray = [];
+        for (let i = grau; i >= 0; i--) coefArray.push(mapa[i] || 0);
+        return coefArray;
+    }
+
+    let fatorarPtrFunc;
+
+    window.Module = {
+        onRuntimeInitialized: function() {
+            fatorarPtrFunc = (ptr, len) => {
+                return Module.ccall('fatorar_array', 'number', ['number', 'number'], [ptr, len]);
+            };
+            document.getElementById("btn").disabled = false;
+            document.getElementById("saida").innerText = "[...]";
+        }
+    };
+
+    function negateExpression(expressao) {
+        // Se for um número puro (sem i, sem parênteses), simplesmente prefixa '-'
+        if (/^-?\d+(\.\d+)?$/.test(expressao)) {
+            return '-' + expressao;
+        }
+        // Caso contrário, retorna a expressão com um '-' na frente
+        // (ex.: -(-0.419643+0.606291i) será exibido como -(-0.419643+0.606291i) por simplicidade)
+        return '-' + expressao;
+    }
+
+    function extrairRaizes(fatoracao) {
+        let raizes = [];
+        let expr = fatoracao.replace(/\s+/g, '');
+        
+        // Remove parênteses externos que envolvem toda a fatoração (ex.: ((x-2)(x+2)) -> (x-2)(x+2) )
+        while (expr.startsWith('(') && expr.endsWith(')')) {
+            let open = 0;
+            let valid = true;
+            for (let i = 0; i < expr.length; i++) {
+                if (expr[i] === '(') open++;
+                else if (expr[i] === ')') open--;
+                if (open === 0 && i < expr.length - 1) {
+                    valid = false;
+                    break;
+                }
+            }
+            if (open === 0 && valid) {
+                expr = expr.substring(1, expr.length - 1);
+            } else {
+                break;
+            }
+        }
+        
+        // Insere '*' explícito entre fatores
+        expr = expr.replace(/\)\(/g, ')*(');
+        expr = expr.replace(/\)x/g, ')*x');
+        expr = expr.replace(/x\(/g, 'x*(');
+        
+        let fatores = expr.split('*');
+        
+        for (let fator of fatores) {
+            if (!fator) continue;
+            fator = fator.trim();
+            
+            // Remove parênteses externos de cada fator individual
+            while (fator.startsWith('(') && fator.endsWith(')')) {
+                fator = fator.substring(1, fator.length - 1).trim();
+            }
+            
+            // Fator tipo "x" ou "x^n"
+            if (fator === 'x') {
+                raizes.push('0');
+                continue;
+            }
+            let matchXOnly = fator.match(/^x\^(\d+)$/);
+            if (matchXOnly) {
+                let exp = parseInt(matchXOnly[1]);
+                for (let i = 0; i < exp; i++) raizes.push('0');
+                continue;
+            }
+            
+            // Fator linear: "x + a" ou "x - a"
+            if (fator.startsWith('x') && (fator[1] === '+' || fator[1] === '-')) {
+                let sinal = fator[1];
+                let expressao = fator.substring(2).trim();
+                let raiz;
+                if (sinal === '-') {
+                    raiz = expressao;
+                } else {
+                    raiz = negateExpression(expressao);
+                }
+                raizes.push(raiz);
+            }
+        }
+        
+        return raizes;
+    }
+
+    function exibirRaizes(raizes) {
+        const container = document.getElementById('roots-container');
+        if (!raizes || raizes.length === 0) {
+            container.innerHTML = '<div class="empty-roots">Nenhuma raiz encontrada</div>';
+            return;
+        }
+        let html = '<ul class="roots-list">';
+        for (let i = 0; i < raizes.length; i++) {
+            let simbolo = (raizes[i].includes('i')) ? '≈' : '=';
+            html += `<li>x ${simbolo} ${raizes[i]}</li>`;
+        }
+        html += '</ul>';
+        container.innerHTML = html;
+    }
+
+    function fatorar() {
+        if (!fatorarPtrFunc) {
+            alert("Waiting...");
+            return;
+        }
+        
+        let input = document.getElementById("input").value;
+        if (!input.trim()) {
+            alert("Type your polynomial");
+            return;
+        }
+        
+        let coef;
+        try {
+            coef = parsePolinomio(input);
+        } catch (e) {
+            document.getElementById("saida").innerText = "Error: " + e.message;
+            document.getElementById("roots-container").innerHTML = '<div class="empty-roots">Error</div>';
+            return;
+        }
+        
+        let bytes = coef.length * 4;
+        let ptr = Module._malloc(bytes);
+        for (let i = 0; i < coef.length; i++) {
+            Module.HEAP32[ptr / 4 + i] = coef[i];
+        }
+        
+        let resultPtr = fatorarPtrFunc(ptr, coef.length);
+        let bytesArray = [];
+        for (let i = 0; i < 50000; i++) {
+            let byte = Module.HEAPU8[resultPtr + i];
+            if (byte === 0) break;
+            bytesArray.push(byte);
+        }
+        
+        let resultadoCompleto = new TextDecoder('utf-8').decode(new Uint8Array(bytesArray));
+        let resultado = resultadoCompleto;
+        let igualIndex = resultadoCompleto.indexOf('=');
+        if (igualIndex !== -1 && igualIndex + 1 < resultadoCompleto.length) {
+            resultado = resultadoCompleto.substring(igualIndex + 1).trim();
+        }
+        
+        document.getElementById("saida").innerText = resultado;
+        
+        let raizes = extrairRaizes(resultado);
+        exibirRaizes(raizes);
+        
+        Module._free(ptr);
+    }
+</script>
+
+<script src="polynomialsz.js"></script>
