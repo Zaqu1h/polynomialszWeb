@@ -212,7 +212,7 @@
             </a>
             <span style="margin-left: 5px;">
                 <a href="https://github.com/Zaqu1h/" target="_blank" style="color: #7f2aee; text-decoration: underline;">Isaque Passos</a>
-                | Computer Science, 2026
+                | Ciência da Computação, 2026
             </span>
         </div>
 
@@ -224,223 +224,246 @@
 </html>
 
 <script>
-    // Ativar tecla Enter no input
-    document.getElementById('input').addEventListener('keypress', function(event) {
-        if (event.key === 'Enter') {
-            event.preventDefault();
-            if (!document.getElementById('btn').disabled) {
-                fatorar();
-            }
+// Enter ativa
+document.getElementById('input').addEventListener('keypress', function(event) {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        if (!document.getElementById('btn').disabled) {
+            fatorar();
         }
+    }
+});
+
+function parsePolinomio(str) {
+    str = str.replace(/\s+/g, '');
+
+    str = str.replaceAll('⁹', '^9')
+             .replaceAll('⁸', '^8')
+             .replaceAll('⁷', '^7')
+             .replaceAll('⁶', '^6')
+             .replaceAll('⁵', '^5')
+             .replaceAll('⁴', '^4')
+             .replaceAll('³', '^3')
+             .replaceAll('²', '^2')
+             .replaceAll('¹', '^1')
+             .replaceAll('⁰', '^0')
+             .replaceAll('**', '^');
+
+    let varMatch = str.match(/[a-zA-Z]/);
+    if (!varMatch) throw new Error("No variables found.");
+    let variavel = varMatch[0];
+
+    let allVars = [...str.matchAll(/[a-zA-Z]/g)];
+    if (allVars.some(m => m[0] !== variavel)) throw new Error("Use only one variable!");
+
+    let termos = str.match(/[+-]?[^+-]+/g);
+    if (!termos) throw new Error("Invalid expression.");
+
+    let mapa = {};
+
+    termos.forEach(t => {
+        let sinal = t.startsWith('-') ? -1 : 1;
+        t = t.replace(/^[+-]/, '');
+        let coef = 1, exp = 0;
+
+        if (t.includes(variavel)) {
+            let partes = t.split(variavel);
+            coef = partes[0] === '' ? 1 :
+                   partes[0] === '-' ? -1 :
+                   parseInt(partes[0]) || 1;
+
+            exp = (partes[1] && partes[1].startsWith('^'))
+                ? parseInt(partes[1].slice(1))
+                : 1;
+        } else {
+            coef = parseInt(t);
+            exp = 0;
+        }
+
+        coef *= sinal;
+        mapa[exp] = (mapa[exp] || 0) + coef;
     });
 
-    function parsePolinomio(str) {
-        str = str.replace(/\s+/g, '');
-        str = str.replaceAll('⁹', '^9')
-                 .replaceAll('⁸', '^8')
-                 .replaceAll('⁷', '^7')
-                 .replaceAll('⁶', '^6')
-                 .replaceAll('⁵', '^5')
-                 .replaceAll('⁴', '^4')
-                 .replaceAll('³', '^3')
-                 .replaceAll('²', '^2')
-                 .replaceAll('¹', '^1')
-                 .replaceAll('⁰', '^0')
-                 .replaceAll('**', '^');
-        
-        let varMatch = str.match(/[a-zA-Z]/);
-        if (!varMatch) throw new Error("No variables found.");
-        let variavel = varMatch[0];
-        
-        let allVars = [...str.matchAll(/[a-zA-Z]/g)];
-        if (allVars.some(m => m[0] !== variavel)) throw new Error("Use only one variable!");
-        
-        let termos = str.match(/[+-]?[^+-]+/g);
-        if (!termos) throw new Error("Invalid expression.");
-        
-        let mapa = {};
-        termos.forEach(t => {
-            let sinal = t.startsWith('-') ? -1 : 1;
-            t = t.replace(/^[+-]/, '');
-            let coef = 1, exp = 0;
-            
-            if (t.includes(variavel)) {
-                let partes = t.split(variavel);
-                if (partes[0] === '') coef = 1;
-                else if (partes[0] === '-') coef = -1;
-                else coef = parseInt(partes[0]);
-                if (isNaN(coef)) coef = 1;
-                
-                if (partes[1] && partes[1].startsWith('^')) exp = parseInt(partes[1].slice(1));
-                else exp = 1;
-            } else {
-                coef = parseInt(t);
-                exp = 0;
-            }
-            coef *= sinal;
-            mapa[exp] = (mapa[exp] || 0) + coef;
-        });
-        
-        let grau = Math.max(...Object.keys(mapa).map(Number));
-        let coefArray = [];
-        for (let i = grau; i >= 0; i--) coefArray.push(mapa[i] || 0);
-        return coefArray;
+    let grau = Math.max(...Object.keys(mapa).map(Number));
+    let coefArray = [];
+
+    for (let i = grau; i >= 0; i--) coefArray.push(mapa[i] || 0);
+
+    return coefArray;
+}
+
+let fatorarPtrFunc;
+
+window.Module = {
+    onRuntimeInitialized: function() {
+        fatorarPtrFunc = (ptr, len) => {
+            return Module.ccall('fatorar_array', 'number', ['number', 'number'], [ptr, len]);
+        };
+        document.getElementById("btn").disabled = false;
+        document.getElementById("saida").innerText = "[...]";
     }
+};
 
-    let fatorarPtrFunc;
+function extrairRaizes(fatoracao) {
+    let raizes = [];
+    let expr = fatoracao.replace(/\s+/g, '');
 
-    window.Module = {
-        onRuntimeInitialized: function() {
-            fatorarPtrFunc = (ptr, len) => {
-                return Module.ccall('fatorar_array', 'number', ['number', 'number'], [ptr, len]);
-            };
-            document.getElementById("btn").disabled = false;
-            document.getElementById("saida").innerText = "[...]";
-        }
-    };
+    let i = 0;
 
-    function negateExpression(expressao) {
-        // Se for um número puro (sem i, sem parênteses), simplesmente prefixa '-'
-        if (/^-?\d+(\.\d+)?$/.test(expressao)) {
-            return '-' + expressao;
-        }
-        // Caso contrário, retorna a expressão com um '-' na frente
-        // (ex.: -(-0.419643+0.606291i) será exibido como -(-0.419643+0.606291i) por simplicidade)
-        return '-' + expressao;
-    }
+    while (i < expr.length) {
 
-    function extrairRaizes(fatoracao) {
-        let raizes = [];
-        let expr = fatoracao.replace(/\s+/g, '');
-        
-        // Remove parênteses externos que envolvem toda a fatoração (ex.: ((x-2)(x+2)) -> (x-2)(x+2) )
-        while (expr.startsWith('(') && expr.endsWith(')')) {
-            let open = 0;
-            let valid = true;
-            for (let i = 0; i < expr.length; i++) {
-                if (expr[i] === '(') open++;
-                else if (expr[i] === ')') open--;
-                if (open === 0 && i < expr.length - 1) {
-                    valid = false;
-                    break;
-                }
+        // procura "(x+..." ou "(x-..."
+        if (expr[i] === '(' && expr[i+1] === 'x' && (expr[i+2] === '+' || expr[i+2] === '-')) {
+
+            let sinal = expr[i+2];
+            let j = i + 3;
+
+            // lê a expressão até fechar o parêntese correto
+            let nivel = 1;
+            let valor = '';
+
+            while (j < expr.length && nivel > 0) {
+                if (expr[j] === '(') nivel++;
+                else if (expr[j] === ')') nivel--;
+
+                if (nivel > 0) valor += expr[j];
+                j++;
             }
-            if (open === 0 && valid) {
-                expr = expr.substring(1, expr.length - 1);
+
+            valor = valor.trim();
+
+            let raiz;
+
+            if (sinal === '-') {
+                raiz = valor;
             } else {
-                break;
-            }
-        }
-        
-        // Insere '*' explícito entre fatores
-        expr = expr.replace(/\)\(/g, ')*(');
-        expr = expr.replace(/\)x/g, ')*x');
-        expr = expr.replace(/x\(/g, 'x*(');
-        
-        let fatores = expr.split('*');
-        
-        for (let fator of fatores) {
-            if (!fator) continue;
-            fator = fator.trim();
-            
-            // Remove parênteses externos de cada fator individual
-            while (fator.startsWith('(') && fator.endsWith(')')) {
-                fator = fator.substring(1, fator.length - 1).trim();
-            }
-            
-            // Fator tipo "x" ou "x^n"
-            if (fator === 'x') {
-                raizes.push('0');
-                continue;
-            }
-            let matchXOnly = fator.match(/^x\^(\d+)$/);
-            if (matchXOnly) {
-                let exp = parseInt(matchXOnly[1]);
-                for (let i = 0; i < exp; i++) raizes.push('0');
-                continue;
-            }
-            
-            // Fator linear: "x + a" ou "x - a"
-            if (fator.startsWith('x') && (fator[1] === '+' || fator[1] === '-')) {
-                let sinal = fator[1];
-                let expressao = fator.substring(2).trim();
-                let raiz;
-                if (sinal === '-') {
-                    raiz = expressao;
+                if (/^-?\d+(\.\d+)?$/.test(valor)) {
+                    raiz = (-parseFloat(valor)).toString();
                 } else {
-                    raiz = negateExpression(expressao);
+                    raiz = '-' + valor;
                 }
-                raizes.push(raiz);
+            }
+
+            raizes.push(raiz);
+
+            i = j;
+            continue;
+        }
+
+        i++;
+    }
+
+    // detecta fatores x^2 - (algo)
+    let regexQuad = /\(x\^2-([^)]+)\)/g;
+    let matchQuad;
+
+    while ((matchQuad = regexQuad.exec(expr)) !== null) {
+        let valor = matchQuad[1].trim();
+
+        // remove parênteses externos
+        if (valor.startsWith('(') && valor.endsWith(')')) {
+            valor = valor.slice(1, -1);
+        }
+
+        // gera ±sqrt(valor)
+        raizes.push(`sqrt(${valor})`);
+        raizes.push(`-sqrt(${valor})`);
+    }
+
+        // trata x e x^n
+        // detecta apenas fator x isolado ou x^n
+    let fatorX = expr.match(/(?:^|\))\(?x(?:\^(\d+))?\)?(?=\(|$)/g);
+
+    if (fatorX) {
+        for (let item of fatorX) {
+            let match = item.match(/x\^(\d+)/);
+            let grau = match ? parseInt(match[1]) : 1;
+
+            for (let k = 0; k < grau; k++) {
+                raizes.push('0');
             }
         }
-        
-        return raizes;
     }
 
-    function exibirRaizes(raizes) {
-        const container = document.getElementById('roots-container');
-        if (!raizes || raizes.length === 0) {
-            container.innerHTML = '<div class="empty-roots">Nenhuma raiz encontrada</div>';
-            return;
-        }
-        let html = '<ul class="roots-list">';
-        for (let i = 0; i < raizes.length; i++) {
-            let simbolo = (raizes[i].includes('i')) ? '≈' : '=';
-            html += `<li>x ${simbolo} ${raizes[i]}</li>`;
-        }
-        html += '</ul>';
-        container.innerHTML = html;
+    return raizes;
+}
+
+function exibirRaizes(raizes) {
+    const container = document.getElementById('roots-container');
+
+    if (!raizes.length) {
+        container.innerHTML = '<div class="empty-roots">Nenhuma raiz encontrada</div>';
+        return;
     }
 
-    function fatorar() {
-        if (!fatorarPtrFunc) {
-            alert("Waiting...");
-            return;
-        }
-        
-        let input = document.getElementById("input").value;
-        if (!input.trim()) {
-            alert("Type your polynomial");
-            return;
-        }
-        
-        let coef;
-        try {
-            coef = parsePolinomio(input);
-        } catch (e) {
-            document.getElementById("saida").innerText = "Error: " + e.message;
-            document.getElementById("roots-container").innerHTML = '<div class="empty-roots">Error</div>';
-            return;
-        }
-        
-        let bytes = coef.length * 4;
-        let ptr = Module._malloc(bytes);
-        for (let i = 0; i < coef.length; i++) {
-            Module.HEAP32[ptr / 4 + i] = coef[i];
-        }
-        
-        let resultPtr = fatorarPtrFunc(ptr, coef.length);
-        let bytesArray = [];
-        for (let i = 0; i < 50000; i++) {
-            let byte = Module.HEAPU8[resultPtr + i];
-            if (byte === 0) break;
-            bytesArray.push(byte);
-        }
-        
-        let resultadoCompleto = new TextDecoder('utf-8').decode(new Uint8Array(bytesArray));
-        let resultado = resultadoCompleto;
-        let igualIndex = resultadoCompleto.indexOf('=');
-        if (igualIndex !== -1 && igualIndex + 1 < resultadoCompleto.length) {
-            resultado = resultadoCompleto.substring(igualIndex + 1).trim();
-        }
-        
-        document.getElementById("saida").innerText = resultado;
-        
-        let raizes = extrairRaizes(resultado);
-        exibirRaizes(raizes);
-        
-        Module._free(ptr);
+    let html = '<ul class="roots-list">';
+
+    for (let r of raizes) {
+        let simbolo = r.includes('i') ? '≈' : '=';
+        html += `<li>x ${simbolo} ${r}</li>`;
     }
+
+    html += '</ul>';
+    container.innerHTML = html;
+}
+
+function fatorar() {
+    if (!fatorarPtrFunc) {
+        alert("Waiting...");
+        return;
+    }
+
+    let input = document.getElementById("input").value;
+
+    if (!input.trim()) {
+        alert("Type your polynomial");
+        return;
+    }
+
+    let coef;
+
+    try {
+        coef = parsePolinomio(input);
+    } catch (e) {
+        document.getElementById("saida").innerText = "Error: " + e.message;
+        document.getElementById("roots-container").innerHTML = '<div class="empty-roots">Error</div>';
+        return;
+    }
+
+    let bytes = coef.length * 4;
+    let ptr = Module._malloc(bytes);
+
+    for (let i = 0; i < coef.length; i++) {
+        Module.HEAP32[ptr / 4 + i] = coef[i];
+    }
+
+    let resultPtr = fatorarPtrFunc(ptr, coef.length);
+
+    let bytesArray = [];
+
+    for (let i = 0; i < 50000; i++) {
+        let byte = Module.HEAPU8[resultPtr + i];
+        if (byte === 0) break;
+        bytesArray.push(byte);
+    }
+
+    let resultadoCompleto = new TextDecoder('utf-8')
+        .decode(new Uint8Array(bytesArray));
+
+    let resultado = resultadoCompleto;
+
+    let idx = resultadoCompleto.indexOf('=');
+    if (idx !== -1) {
+        resultado = resultadoCompleto.substring(idx + 1).trim();
+    }
+
+    document.getElementById("saida").innerText = resultado;
+
+    let raizes = extrairRaizes(resultado);
+    exibirRaizes(raizes);
+
+    Module._free(ptr);
+}
 </script>
 
 <script src="polynomialsz.js"></script>
