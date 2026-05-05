@@ -13,14 +13,14 @@
  * The algorithm works with polynomials with integer coefficients.
  *
  * @author Isaque Passos
- * @version 1.1.1
+ * @version 1.1.2
  * @date 2026
  *
  * @note Version 1.0.0: Initial implementation.
  * @note Version 1.1.0: Added Aberth method and other improvements.
  * @note Version 1.1.1: Mild corrections and improvements.
+ * @note Version 1.1.2: Mild corrections and improvements.
  */
-
 #define ABERTH_ITERS 68
 #define OUTPUT_SIZE 100000
 
@@ -83,7 +83,6 @@ void appendf(const char* fmt, ...) {
 
     va_end(args);
 
-    // proteção contra overflow
     if (out_index >= OUTPUT_SIZE) {
         out_index = OUTPUT_SIZE - 1;
         OUTPUT[out_index] = '\0';
@@ -628,7 +627,7 @@ void fac(polynomial p) {
     int maxExp = 0;
     int binary = 1;
     int sequence = 1;
-    int maxCoefOne = 1;
+    int maxCoefOne = 0;
 
     sol = 0;
 
@@ -647,34 +646,32 @@ void fac(polynomial p) {
 
     for (int j = 0; j < p.numTerms; j++) {
 
-        if (j > 0 && p.terms[j-1].exponent != p.terms[j].exponent + 1) {
+        if (sequence == 1 && j > 0 && p.terms[j-1].exponent != p.terms[j].exponent + 1) {
 
             maxCoefOne = 0;
             sequence = 0;
         }
 
-        maxCoefOne = ((abs)(p.terms[j].coefficient) * maxCoefOne);
+        maxCoefOne += (p.terms[j].coefficient);
 
 		maxNum = (abs(p.terms[j].coefficient) > abs(maxNum)) ? abs(p.terms[j].coefficient) : abs(maxNum);
 		maxExp = (p.terms[j].exponent > maxExp) ? p.terms[j].exponent : maxExp;
     }
-
-    maxCoefOne = (abs)(maxCoefOne);
 
     for (int i = 0; i < p.numTerms; i++){
 
         if(p.terms[i].coefficient == 0) qtZeros++;
     }
 
-    if(divider > 1 || divider < -1) appendf("%i", divider);
+    if(divider > 1 || divider < -1) printf("%i", divider);
 
     if(degreeX != 0){
 
-        appendf("%c^%d", var, degreeX);
+        printf("%c^%d", var, degreeX);
 
         if(maxExp == 0){
 
-            appendf("\n\n");
+            printf("\n\n");
             return;
         }
     }
@@ -684,16 +681,16 @@ void fac(polynomial p) {
         bhaskara(p);
         sol = 1;
     }
-    if(sequence == 1 && maxCoefOne != 1 && sol == 0){
+    if(sequence == 1 && maxCoefOne != p.numTerms && sol == 0){
 
         briotRuffini(p, maxNum);
     }
-    else if(maxCoefOne == 1 && p.terms[0].exponent % 2 == 0 && sol == 0){
+    else if(maxCoefOne == p.numTerms && p.terms[0].exponent % 2 == 0 && sol == 0){
 
         cyclotomicFac(p);
         sol = 1;
         degreeX = 0;
-        appendf("\n\n");
+        printf("\n\n");
         return;
     }
     if(sol == 0){
@@ -702,7 +699,7 @@ void fac(polynomial p) {
     }
 
     degreeX = 0;
-    appendf("\n\n");
+    printf("\n\n");
 
     return;
 }
