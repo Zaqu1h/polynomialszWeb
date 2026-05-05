@@ -113,6 +113,7 @@ char* fatorar_array(int* coef, int n) {
         p.terms[i] = setTerms(coef[i], n - i - 1);
     }
 
+    removeZeros(&p);
     pFree(p);
 
     return OUTPUT;
@@ -872,4 +873,3 @@ void pFree(polynomial p) {
     free(p.terms);
     p.terms = NULL;
 }
-
