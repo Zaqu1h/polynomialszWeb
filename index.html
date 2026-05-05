@@ -355,21 +355,31 @@ function extrairRaizes(fatoracao) {
         i++;
     }
 
-    // detecta fatores x^2 - (algo)
-    let regexQuad = /\(x\^2-([^)]+)\)/g;
+    // detecta fatores x^2 - (algo) com parênteses balanceados
+    let regexQuad = /\(x\^2-/g;
     let matchQuad;
 
     while ((matchQuad = regexQuad.exec(expr)) !== null) {
-        let valor = matchQuad[1].trim();
-
-        // remove parênteses externos
+        let inicio = matchQuad.index + 5; // depois de "(x^2-"
+        let nivel = 1;
+        let j = inicio;
+        let valor = '';
+        
+        while (j < expr.length && nivel > 0) {
+            if (expr[j] === '(') nivel++;
+            else if (expr[j] === ')') nivel--;
+            if (nivel > 0) valor += expr[j];
+            j++;
+        }
+        
+        valor = valor.trim();
+        
         if (valor.startsWith('(') && valor.endsWith(')')) {
             valor = valor.slice(1, -1);
         }
-
-        // gera ±sqrt(valor)
-        raizes.push(`sqrt(${valor})`);
-        raizes.push(`-sqrt(${valor})`);
+        
+        raizes.push(`Sqrt(${valor})`);
+        raizes.push(`-Sqrt(${valor})`);
     }
 
         // trata x e x^n
@@ -410,7 +420,7 @@ function exibirRaizes(raizes) {
     container.innerHTML = html;
 }
 function formatarRaiz(raiz) {
-
+    // Exp -> e^expressão
     raiz = raiz.replace(/Exp\[([^\]]+)\]/g, (match, exp) => {
         const sobrescrito = exp
             .replace(/[0-9]/g, d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d])
@@ -421,23 +431,36 @@ function formatarRaiz(raiz) {
             .replace(/\*/g, '')
             .replace(/\//g, '⸍')
             .replace(/\(/g, '⁽')
-            .replace(/\)/g, '⁾')
-            .replace(/\⸍/g, '⁾⸍');
-
-        return 'e⁽' + sobrescrito;
+            .replace(/\)/g, '⁾');
+        return 'e' + sobrescrito;
     });
     
-    raiz = raiz.replace(/Sqrt\[([^\]]+)\]/g, (match, exp) => {
-        let comBarra = '';
-        for (let char of exp) {
-            comBarra += char + '\u0305';
+    // Sqrt[...] com colchetes
+    raiz = raiz.replace(/[Ss]qrt\[([^\]]+)\]/g, '√($1)');
+    
+    // Sqrt(...) com parênteses balanceados
+    let resultado = '';
+    let i = 0;
+    while (i < raiz.length) {
+        if (raiz.substring(i, i + 5).toLowerCase() === 'sqrt(') {
+            let nivel = 1;
+            let j = i + 5;
+            let exp = '';
+            while (j < raiz.length && nivel > 0) {
+                if (raiz[j] === '(') nivel++;
+                else if (raiz[j] === ')') nivel--;
+                if (nivel > 0) exp += raiz[j];
+                j++;
+            }
+            resultado += '√(' + exp + ')';
+            i = j;
+        } else {
+            resultado += raiz[i];
+            i++;
         }
-        return '√' + comBarra;
-    });
+    }
     
-    raiz = raiz.replace(/pi/g, 'π');
-    
-    return raiz;
+    return resultado;
 }
 
 function fatorar() {
