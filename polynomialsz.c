@@ -36,7 +36,9 @@ int divider = 0;
 #include <math.h>
 #include <complex.h>
 #include <stdarg.h>
+#ifdef __EMSCRIPTEN__
 #include <emscripten/emscripten.h>
+#endif
 
 int gcd(int a, int b);
 int indOfRoot(int rad, double rt);
@@ -98,7 +100,9 @@ void reset_output() {
 
 //-----------------------------------------------------------------------------
 
+#ifdef __EMSCRIPTEN__
 EMSCRIPTEN_KEEPALIVE
+#endif
 char* fatorar_array(int* coef, int n) {
 
     reset_output();
@@ -868,3 +872,4 @@ void pFree(polynomial p) {
     free(p.terms);
     p.terms = NULL;
 }
+
