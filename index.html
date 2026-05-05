@@ -342,7 +342,12 @@ function extrairRaizes(fatoracao) {
                 if (/^-?\d+(\.\d+)?$/.test(valor)) {
                     raiz = (-parseFloat(valor)).toString();
                 } else {
-                    raiz = '-' + valor;
+                    // simplifica: -(algo) vira o oposto
+                    if (valor.startsWith('-')) {
+                        raiz = valor.substring(1);
+                    } else {
+                        raiz = '-' + valor;
+                    }
                 }
             }
 
@@ -377,6 +382,21 @@ function extrairRaizes(fatoracao) {
         if (valor.startsWith('(') && valor.endsWith(')')) {
             valor = valor.slice(1, -1);
         }
+        
+        raizes.push(valor);
+
+        if (valor.startsWith('(-')) {
+
+            raizes.push(valor.replace('(-', '('));
+        } else if (valor.startsWith('(')) {
+
+            raizes.push(valor.replace('(', '(-'));
+        } else if (valor.startsWith('-')) {
+            
+            raizes.push(valor.substring(1));
+        } else {
+            raizes.push('-' + valor);
+        }
     }
 
         // trata x e x^n
@@ -398,6 +418,7 @@ function extrairRaizes(fatoracao) {
 }
 
 function exibirRaizes(raizes) {
+    
     const container = document.getElementById('roots-container');
 
     if (!raizes.length) {
