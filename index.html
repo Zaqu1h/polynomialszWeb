@@ -377,9 +377,6 @@ function extrairRaizes(fatoracao) {
         if (valor.startsWith('(') && valor.endsWith(')')) {
             valor = valor.slice(1, -1);
         }
-        
-        raizes.push(`Sqrt(${valor})`);
-        raizes.push(`-Sqrt(${valor})`);
     }
 
         // trata x e x^n
