@@ -125,8 +125,10 @@
         }
 
         .roots-list li::before {
-            content: "🌱 ";
+            content: "🪾";
             margin-right: 5px;
+            display: inline-block;
+            transform: scaleY(-1);
         }
 
         .empty-roots {
@@ -201,7 +203,7 @@
 
 <div class="main-area">
     <div class="container">
-        <h2><a href="https://github.com/Zaqu1h/polynomialsz" target="_blank" style="color: white; text-decoration: none;">Polynomialsz v1.1.1</a></h2>
+        <h2><a href="https://github.com/Zaqu1h/polynomialsz" target="_blank" style="color: white; text-decoration: none;">Polynomialsz v1.1.2</a></h2>
 
         <input id="input" placeholder="Example: x^3 - x^2 - x - 1, x**10 - 1...">
         <button id="btn" onclick="fatorar()" disabled>Factorize / Find roots</button>
@@ -400,11 +402,42 @@ function exibirRaizes(raizes) {
 
     for (let r of raizes) {
         let simbolo = r.includes('i') ? '≈' : '=';
-        html += `<li>x ${simbolo} ${r}</li>`;
+        let raizFormatada = formatarRaiz(r);
+        html += `<li>x ${simbolo} ${raizFormatada}</li>`;
     }
 
     html += '</ul>';
     container.innerHTML = html;
+}
+function formatarRaiz(raiz) {
+
+    raiz = raiz.replace(/Exp\[([^\]]+)\]/g, (match, exp) => {
+        const sobrescrito = exp
+            .replace(/[0-9]/g, d => '⁰¹²³⁴⁵⁶⁷⁸⁹'[d])
+            .replace(/P/g, 'ᵖ')
+            .replace(/i/g, 'ⁱ')
+            .replace(/\+/g, '⁺')
+            .replace(/\-/g, '⁻')
+            .replace(/\*/g, '')
+            .replace(/\//g, '⸍')
+            .replace(/\(/g, '⁽')
+            .replace(/\)/g, '⁾')
+            .replace(/\⸍/g, '⁾⸍');
+
+        return 'e⁽' + sobrescrito;
+    });
+    
+    raiz = raiz.replace(/Sqrt\[([^\]]+)\]/g, (match, exp) => {
+        let comBarra = '';
+        for (let char of exp) {
+            comBarra += char + '\u0305';
+        }
+        return '√' + comBarra;
+    });
+    
+    raiz = raiz.replace(/pi/g, 'π');
+    
+    return raiz;
 }
 
 function fatorar() {
